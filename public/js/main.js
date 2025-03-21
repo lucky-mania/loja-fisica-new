@@ -1,23 +1,18 @@
 /**
- * Script principal - inicializa a aplicação
+ * Função que é executada quando o DOM estiver carregado
  */
-
-// Quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', () => {
-  // Inicializar a loja
-  initializeStore();
-  
-  // Inicializar a interface do usuário
-  initializeUI();
-  
-  // Inicializar o carrinho
-  initializeCart();
-  
-  // Inicializar a área administrativa
-  initializeAdmin();
-  
-  // Exibir mensagem de boas-vindas
-  setTimeout(() => {
-    showToast('Bem-vindo', 'Bem-vindo à Fashion Store!');
-  }, 1000);
+    // Inicializa a loja (produtos, configurações, etc.)
+    initializeStore();
+    
+    // Inicializa a funcionalidade de carrinho
+    initializeCart();
+    
+    // Inicializa o painel administrativo
+    initializeAdmin();
+    
+    // Inicializa a interface do usuário
+    initializeUI();
+    
+    console.log('Loja inicializada com sucesso!');
 });

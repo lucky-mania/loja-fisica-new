@@ -1,226 +1,251 @@
 /**
- * Gerenciamento do carrinho de compras
+ * Inicializa o carrinho e seus eventos
  */
-
-// Elementos do carrinho
-const cartBtn = document.getElementById('cartBtn');
-const cartModal = document.getElementById('cartModal');
-const cartItemsContainer = document.getElementById('cartItems');
-const cartSubtotalElement = document.getElementById('cartSubtotal');
-const cartDiscountElement = document.getElementById('cartDiscount');
-const cartTotalElement = document.getElementById('cartTotal');
-const discountRowElement = document.getElementById('discountRow');
-const couponInput = document.getElementById('couponInput');
-const applyCouponBtn = document.getElementById('applyCouponBtn');
-const checkoutBtn = document.getElementById('checkoutBtn');
-
-// Valores do carrinho
-let cartSubtotal = 0;
-let cartDiscount = 0;
-let cartTotal = 0;
-
-// Inicializar carrinho
 function initializeCart() {
-  // Adicionar event listeners
-  cartBtn.addEventListener('click', openCart);
-  cartModal.querySelector('.close-btn').addEventListener('click', closeCart);
-  applyCouponBtn.addEventListener('click', handleApplyCoupon);
-  checkoutBtn.addEventListener('click', handleCheckout);
-  
-  // Fechar modal quando clicar fora do conteúdo
-  cartModal.addEventListener('click', (e) => {
-    if (e.target === cartModal) {
-      closeCart();
-    }
-  });
-  
-  // Escutar tecla ESC para fechar modal
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && cartModal.classList.contains('active')) {
-      closeCart();
-    }
-  });
-  
-  // Escutar eventos de atualização do carrinho
-  window.addEventListener('cartUpdated', () => {
-    if (cartModal.classList.contains('active')) {
-      loadCartItems();
-    }
-  });
+    // Elementos do DOM
+    const cartIcon = document.getElementById('cart-icon');
+    const cartModal = document.getElementById('cart-modal');
+    const closeCartBtn = document.getElementById('close-cart-btn');
+    const cartItems = document.getElementById('cart-items');
+    const cartSubtotal = document.getElementById('cart-subtotal');
+    const cartDiscount = document.getElementById('cart-discount');
+    const cartTotal = document.getElementById('cart-total');
+    const discountContainer = document.getElementById('discount-container');
+    const applyCouponBtn = document.getElementById('apply-coupon-btn');
+    const couponInput = document.getElementById('coupon-input');
+    const clearCartBtn = document.getElementById('clear-cart-btn');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    
+    // Event listeners
+    cartIcon.addEventListener('click', openCart);
+    closeCartBtn.addEventListener('click', closeCart);
+    applyCouponBtn.addEventListener('click', handleApplyCoupon);
+    clearCartBtn.addEventListener('click', () => {
+        clearCart();
+        loadCartItems();
+        showToast('Carrinho limpo', 'Todos os produtos foram removidos do carrinho.');
+    });
+    checkoutBtn.addEventListener('click', handleCheckout);
+    
+    // Fecha o modal ao clicar fora dele
+    cartModal.addEventListener('click', (e) => {
+        if (e.target === cartModal) {
+            closeCart();
+        }
+    });
+    
+    // Atualiza o contador do carrinho quando ele for modificado
+    document.addEventListener('cartUpdated', () => {
+        const cartBadge = document.getElementById('cart-badge');
+        cartBadge.textContent = getCartCount();
+    });
+    
+    // Inicializa o contador do carrinho
+    document.dispatchEvent(new Event('cartUpdated'));
 }
 
-// Abrir modal do carrinho
+/**
+ * Abre o modal do carrinho
+ */
 function openCart() {
-  cartModal.classList.add('active');
-  document.body.style.overflow = 'hidden'; // Evitar scroll da página
-  loadCartItems();
-}
-
-// Fechar modal do carrinho
-function closeCart() {
-  cartModal.classList.remove('active');
-  document.body.style.overflow = '';
-}
-
-// Carregar itens do carrinho
-function loadCartItems() {
-  const cartItems = getCart();
-  
-  // Limpar itens existentes
-  cartItemsContainer.innerHTML = '';
-  
-  if (cartItems.length === 0) {
-    // Exibir mensagem de carrinho vazio
-    cartItemsContainer.innerHTML = `
-      <div class="empty-cart">
-        <span class="material-icons">shopping_cart</span>
-        <p>Seu carrinho está vazio</p>
-        <button class="continue-shopping" onclick="closeCart()">
-          Continuar Comprando
-        </button>
-      </div>
-    `;
-    
-    // Zerar totais
-    updateCartTotals(0, 0);
-    return;
-  }
-  
-  // Calcular subtotal
-  cartSubtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  
-  // Adicionar itens do carrinho
-  cartItems.forEach(item => {
-    const cartItemElement = document.createElement('div');
-    cartItemElement.className = 'cart-item';
-    
-    cartItemElement.innerHTML = `
-      <div class="cart-item-info">
-        <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-image">
-        <div>
-          <div class="cart-item-name">${item.name}</div>
-          <div class="cart-item-price">R$ ${formatCurrency(item.price)}</div>
-        </div>
-      </div>
-      <div class="cart-item-actions">
-        <div class="quantity-control">
-          <button class="quantity-btn minus-btn" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
-          <span class="quantity-value">${item.quantity}</span>
-          <button class="quantity-btn plus-btn">+</button>
-        </div>
-        <button class="remove-item-btn">
-          <span class="material-icons">delete</span>
-        </button>
-      </div>
-    `;
-    
-    // Adicionar event listeners
-    cartItemElement.querySelector('.minus-btn').addEventListener('click', () => {
-      if (item.quantity > 1) {
-        updateCartItemQuantity(item.id, -1);
-      }
-    });
-    
-    cartItemElement.querySelector('.plus-btn').addEventListener('click', () => {
-      updateCartItemQuantity(item.id, 1);
-    });
-    
-    cartItemElement.querySelector('.remove-item-btn').addEventListener('click', () => {
-      removeFromCart(item.id);
-    });
-    
-    cartItemsContainer.appendChild(cartItemElement);
-  });
-  
-  // Verificar cupom aplicado e atualizar totais
-  const appliedCoupon = getAppliedCoupon();
-  
-  if (appliedCoupon) {
-    const discountAmount = (cartSubtotal * appliedCoupon.discount) / 100;
-    updateCartTotals(cartSubtotal, discountAmount);
-    
-    // Mostrar código do cupom no input
-    couponInput.value = appliedCoupon.code;
-    couponInput.disabled = true;
-    applyCouponBtn.textContent = 'Remover';
-    applyCouponBtn.onclick = removeCouponFromCart;
-  } else {
-    updateCartTotals(cartSubtotal, 0);
-    
-    // Limpar input do cupom
-    couponInput.value = '';
-    couponInput.disabled = false;
-    applyCouponBtn.textContent = 'Aplicar';
-    applyCouponBtn.onclick = handleApplyCoupon;
-  }
-}
-
-// Atualizar totais do carrinho
-function updateCartTotals(subtotal, discount) {
-  cartSubtotal = subtotal;
-  cartDiscount = discount;
-  cartTotal = subtotal - discount;
-  
-  // Atualizar elementos da interface
-  cartSubtotalElement.textContent = `R$ ${formatCurrency(subtotal)}`;
-  
-  if (discount > 0) {
-    cartDiscountElement.textContent = `- R$ ${formatCurrency(discount)}`;
-    discountRowElement.classList.remove('hidden');
-  } else {
-    discountRowElement.classList.add('hidden');
-  }
-  
-  cartTotalElement.textContent = `R$ ${formatCurrency(cartTotal)}`;
-}
-
-// Aplicar cupom ao carrinho
-function handleApplyCoupon() {
-  const code = couponInput.value.trim().toUpperCase();
-  
-  if (!code) {
-    showToast('Erro', 'Por favor, insira um código de cupom', 'error');
-    return;
-  }
-  
-  const result = applyCoupon(code);
-  
-  if (result.success) {
-    showToast('Cupom aplicado', `Cupom ${code} aplicado com sucesso!`);
+    document.getElementById('cart-modal').style.display = 'block';
     loadCartItems();
-  } else {
-    showToast('Erro', result.message, 'error');
-  }
 }
 
-// Remover cupom do carrinho
+/**
+ * Fecha o modal do carrinho
+ */
+function closeCart() {
+    document.getElementById('cart-modal').style.display = 'none';
+    
+    // Limpa o campo de cupom ao fechar
+    document.getElementById('coupon-input').value = '';
+}
+
+/**
+ * Carrega os itens do carrinho no modal
+ */
+function loadCartItems() {
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cart = getCart();
+    
+    // Limpa o conteúdo atual
+    cartItemsContainer.innerHTML = '';
+    
+    if (cart.length === 0) {
+        cartItemsContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-shopping-cart"></i>
+                <p>Seu carrinho está vazio</p>
+            </div>
+        `;
+        
+        // Atualiza os totais
+        updateCartTotals(0, 0);
+        return;
+    }
+    
+    // Calcula o subtotal
+    let subtotal = 0;
+    
+    // Adiciona cada item ao carrinho
+    cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        subtotal += itemTotal;
+        
+        const itemElement = document.createElement('div');
+        itemElement.className = 'cart-item';
+        itemElement.innerHTML = `
+            <div class="cart-item-img">
+                <img src="${item.imageUrl}" alt="${item.name}">
+            </div>
+            <div class="cart-item-details">
+                <div class="cart-item-title">${item.name}</div>
+                <div class="cart-item-price">${formatCurrency(item.price)}</div>
+                <div class="cart-item-quantity">
+                    <button class="quantity-btn decrease-btn" data-id="${item.id}">-</button>
+                    <span class="quantity-value">${item.quantity}</span>
+                    <button class="quantity-btn increase-btn" data-id="${item.id}">+</button>
+                </div>
+            </div>
+            <div class="cart-item-remove" data-id="${item.id}">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+        `;
+        
+        cartItemsContainer.appendChild(itemElement);
+    });
+    
+    // Adiciona event listeners para os botões de quantidade e remoção
+    const decreaseBtns = cartItemsContainer.querySelectorAll('.decrease-btn');
+    const increaseBtns = cartItemsContainer.querySelectorAll('.increase-btn');
+    const removeBtns = cartItemsContainer.querySelectorAll('.cart-item-remove');
+    
+    decreaseBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const itemId = btn.getAttribute('data-id');
+            updateCartItemQuantity(itemId, -1);
+            loadCartItems();
+        });
+    });
+    
+    increaseBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const itemId = btn.getAttribute('data-id');
+            updateCartItemQuantity(itemId, 1);
+            loadCartItems();
+        });
+    });
+    
+    removeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const itemId = btn.getAttribute('data-id');
+            removeFromCart(itemId);
+            loadCartItems();
+        });
+    });
+    
+    // Verifica se há cupom aplicado e atualiza os totais
+    const appliedCoupon = getAppliedCoupon();
+    let discount = 0;
+    
+    if (appliedCoupon) {
+        discount = (subtotal * appliedCoupon.discount) / 100;
+        document.getElementById('coupon-input').value = appliedCoupon.code;
+    }
+    
+    updateCartTotals(subtotal, discount);
+}
+
+/**
+ * Atualiza os totais do carrinho
+ * @param {number} subtotal - Subtotal do carrinho
+ * @param {number} discount - Valor do desconto
+ */
+function updateCartTotals(subtotal, discount) {
+    const cartSubtotal = document.getElementById('cart-subtotal');
+    const cartDiscount = document.getElementById('cart-discount');
+    const cartTotal = document.getElementById('cart-total');
+    const discountContainer = document.getElementById('discount-container');
+    
+    cartSubtotal.textContent = formatCurrency(subtotal);
+    
+    if (discount > 0) {
+        cartDiscount.textContent = `- ${formatCurrency(discount)}`;
+        discountContainer.style.display = 'flex';
+    } else {
+        discountContainer.style.display = 'none';
+    }
+    
+    const total = subtotal - discount;
+    cartTotal.textContent = formatCurrency(total);
+}
+
+/**
+ * Manipula a aplicação de cupom
+ */
+function handleApplyCoupon() {
+    const couponInput = document.getElementById('coupon-input');
+    const couponCode = couponInput.value.trim();
+    
+    if (!couponCode) {
+        showToast('Atenção', 'Digite um código de cupom válido.', 'error');
+        return;
+    }
+    
+    // Remove qualquer cupom existente
+    removeFromLocalStorage('appliedCoupon');
+    
+    // Tenta aplicar o cupom
+    const result = applyCoupon(couponCode);
+    
+    if (result.success) {
+        showToast('Cupom aplicado', `Desconto de ${result.coupon.discount}% aplicado com sucesso!`);
+        loadCartItems(); // Atualiza os totais
+    } else {
+        showToast('Erro', result.message, 'error');
+        couponInput.value = '';
+    }
+}
+
+/**
+ * Remove o cupom aplicado ao carrinho
+ */
 function removeCouponFromCart() {
-  removeFromLocalStorage('appliedCoupon');
-  dispatchCustomEvent('cartUpdated');
-  showToast('Cupom removido', 'Cupom removido do carrinho');
-  loadCartItems();
+    removeFromLocalStorage('appliedCoupon');
+    document.getElementById('coupon-input').value = '';
+    loadCartItems(); // Atualiza os totais
+    showToast('Cupom removido', 'O cupom foi removido do carrinho.');
 }
 
-// Finalizar compra
+/**
+ * Manipula a finalização da compra
+ */
 function handleCheckout() {
-  const cartItems = getCart();
-  
-  if (cartItems.length === 0) {
-    showToast('Carrinho vazio', 'Adicione produtos ao carrinho antes de finalizar', 'error');
-    return;
-  }
-  
-  const appliedCoupon = getAppliedCoupon();
-  
-  // Enviar pedido para WhatsApp
-  sendToWhatsApp(cartItems, cartSubtotal, cartDiscount, cartTotal, appliedCoupon);
-  
-  // Limpar carrinho
-  clearCart();
-  
-  // Fechar modal do carrinho
-  closeCart();
-  
-  // Exibir mensagem de sucesso
-  showToast('Pedido enviado', 'Seu pedido foi enviado para o WhatsApp da loja');
+    const cart = getCart();
+    
+    if (cart.length === 0) {
+        showToast('Atenção', 'Seu carrinho está vazio.', 'error');
+        return;
+    }
+    
+    // Calcula subtotal, desconto e total
+    const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    const appliedCoupon = getAppliedCoupon();
+    let discount = 0;
+    
+    if (appliedCoupon) {
+        discount = (subtotal * appliedCoupon.discount) / 100;
+    }
+    
+    const total = subtotal - discount;
+    
+    // Envia pedido para o WhatsApp
+    sendToWhatsApp(cart, subtotal, discount, total, appliedCoupon);
+    
+    // Limpa o carrinho após o envio
+    clearCart();
+    closeCart();
+    
+    showToast('Pedido enviado', 'Seu pedido foi enviado com sucesso para o WhatsApp!');
 }
