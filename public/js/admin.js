@@ -140,6 +140,9 @@ function initializeAdmin() {
     // Size options initialization for products
     initializeSizeOptions();
     
+    // Initialize news table
+    loadNewsTable();
+    
     // Verifica se há uma sessão de admin ativa
     checkAdminSession();
 }
@@ -275,12 +278,28 @@ function handleProductSubmit(e) {
     const productImage = document.getElementById('product-image').value;
     const productDescription = document.getElementById('product-description').value;
     
+    // Captura os tamanhos selecionados
+    const sizeCheckboxes = document.querySelectorAll('.size-checkbox:checked');
+    const selectedSizes = Array.from(sizeCheckboxes).map(checkbox => checkbox.value);
+    
+    // Define os tamanhos disponíveis com base na categoria selecionada
+    let allSizes = [];
+    if (productCategory === 'camisetas') {
+        allSizes = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
+    } else if (productCategory === 'calcas') {
+        allSizes = ['36', '38', '40', '42', '44', '46', '48', '50'];
+    } else if (productCategory === 'acessorios') {
+        allSizes = ['Único'];
+    }
+    
     const productData = {
         name: productName,
         price: productPrice,
         category: productCategory,
         imageUrl: productImage,
-        description: productDescription
+        description: productDescription,
+        sizes: allSizes,
+        availableSizes: selectedSizes.length > 0 ? selectedSizes : allSizes // Se nenhum tamanho for selecionado, usa todos
     };
     
     // Verifica se é uma edição ou adição
@@ -343,6 +362,28 @@ function editProduct(productId) {
         document.getElementById('product-image').value = product.imageUrl;
         document.getElementById('product-description').value = product.description || '';
         document.getElementById('cancel-product-btn').style.display = 'inline-block';
+        
+        // Atualiza os tamanhos disponíveis para a categoria selecionada
+        initializeSizeOptions();
+        
+        // Marca os checkboxes dos tamanhos disponíveis
+        setTimeout(() => {
+            if (product.availableSizes && product.availableSizes.length > 0) {
+                product.availableSizes.forEach(size => {
+                    const checkbox = document.getElementById(`size-${size}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                });
+            }
+        }, 100); // Pequeno timeout para garantir que os checkboxes foram criados
+        
+        // Exibe a imagem do produto no preview
+        const imagePreview = document.getElementById('image-preview');
+        if (imagePreview && product.imageUrl) {
+            imagePreview.innerHTML = `<img src="${product.imageUrl}" alt="Preview">`;
+            imagePreview.style.display = 'block';
+        }
         
         // Rola a página para o formulário
         document.getElementById('product-form').scrollIntoView({ behavior: 'smooth' });
@@ -561,6 +602,273 @@ function loadSettingsForm() {
     document.getElementById('whatsapp-number').value = settings.whatsappNumber;
     document.getElementById('welcome-message').value = settings.welcomeMessage;
     document.getElementById('admin-password-change').value = '';
+}
+
+/**
+ * Inicializa as opções de tamanho para produtos
+ */
+function initializeSizeOptions() {
+    const sizeOptionsContainer = document.getElementById('size-options');
+    const productCategory = document.getElementById('product-category');
+    
+    if (!sizeOptionsContainer || !productCategory) return;
+    
+    // Defina os tamanhos disponíveis com base na categoria
+    const updateSizeOptions = () => {
+        const category = productCategory.value;
+        sizeOptionsContainer.innerHTML = '';
+        
+        let sizes = [];
+        
+        if (category === 'camisetas') {
+            sizes = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
+        } else if (category === 'calcas') {
+            sizes = ['36', '38', '40', '42', '44', '46', '48', '50'];
+        } else if (category === 'acessorios') {
+            sizes = ['Único'];
+        }
+        
+        // Cria checkboxes para cada tamanho
+        sizes.forEach(size => {
+            const id = `size-${size}`;
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = id;
+            checkbox.className = 'size-checkbox';
+            checkbox.value = size;
+            checkbox.name = 'sizes';
+            
+            const label = document.createElement('label');
+            label.htmlFor = id;
+            label.className = 'size-label';
+            label.textContent = size;
+            
+            sizeOptionsContainer.appendChild(checkbox);
+            sizeOptionsContainer.appendChild(label);
+        });
+    };
+    
+    // Atualiza as opções quando a categoria muda
+    productCategory.addEventListener('change', updateSizeOptions);
+    
+    // Inicializa as opções
+    updateSizeOptions();
+}
+
+/**
+ * Abre a galeria de imagens
+ */
+function openGallery(inputId, previewId) {
+    const galleryModal = document.getElementById('gallery-modal');
+    currentInput = document.getElementById(inputId);
+    currentPreview = document.getElementById(previewId);
+    selectedGalleryItem = null;
+    
+    // Reset selected class
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    galleryItems.forEach(item => {
+        item.style.border = '2px solid transparent';
+        
+        // If this item matches current input value, select it
+        if (currentInput && item.getAttribute('data-url') === currentInput.value) {
+            item.style.border = '2px solid var(--primary-color)';
+            selectedGalleryItem = item;
+        }
+    });
+    
+    galleryModal.style.display = 'block';
+}
+
+/**
+ * Manipula o envio do formulário de novidades
+ */
+function handleNewsSubmit(e) {
+    e.preventDefault();
+    
+    // Obtém os valores do formulário
+    const newsId = document.getElementById('news-id').value;
+    const newsTitle = document.getElementById('news-title').value;
+    const newsDescription = document.getElementById('news-description').value;
+    const newsImage = document.getElementById('news-image').value;
+    const newsDate = document.getElementById('news-date').value;
+    
+    const newsData = {
+        title: newsTitle,
+        description: newsDescription,
+        imageUrl: newsImage,
+        date: new Date(newsDate).toISOString()
+    };
+    
+    // Verifica se é uma edição ou adição
+    if (newsId) {
+        // Edição
+        const newsItem = {
+            id: newsId,
+            ...newsData
+        };
+        
+        if (updateNews(newsItem)) {
+            showToast('Novidade atualizada', `A novidade "${newsTitle}" foi atualizada com sucesso.`);
+            resetNewsForm();
+            loadNewsTable();
+        } else {
+            showToast('Erro', 'Não foi possível atualizar a novidade.', 'error');
+        }
+    } else {
+        // Adição
+        const newNews = addNews(newsData);
+        showToast('Novidade adicionada', `A novidade "${newsTitle}" foi adicionada com sucesso.`);
+        resetNewsForm();
+        loadNewsTable();
+        
+        // Atualiza a seção de novidades na página principal
+        loadNewsSection();
+    }
+}
+
+/**
+ * Cancela a edição de uma novidade
+ */
+function cancelNewsEdit() {
+    resetNewsForm();
+    showToast('Edição cancelada', 'A edição da novidade foi cancelada.');
+}
+
+/**
+ * Reseta o formulário de novidade
+ */
+function resetNewsForm() {
+    document.getElementById('news-id').value = '';
+    document.getElementById('news-title').value = '';
+    document.getElementById('news-description').value = '';
+    document.getElementById('news-image').value = '';
+    document.getElementById('news-date').value = '';
+    
+    // Reset image preview
+    const imagePreview = document.getElementById('news-image-preview');
+    if (imagePreview) {
+        imagePreview.innerHTML = '';
+        imagePreview.style.display = 'none';
+    }
+    
+    // Hide cancel button
+    const cancelBtn = document.getElementById('cancel-news-btn');
+    if (cancelBtn) {
+        cancelBtn.style.display = 'none';
+    }
+}
+
+/**
+ * Carrega a tabela de novidades
+ */
+function loadNewsTable() {
+    const newsTableBody = document.querySelector('#news-table tbody');
+    if (!newsTableBody) return;
+    
+    const news = getNews();
+    
+    newsTableBody.innerHTML = '';
+    
+    if (news.length === 0) {
+        newsTableBody.innerHTML = `
+            <tr>
+                <td colspan="3" class="empty-table">Nenhuma novidade cadastrada</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    news.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.title}</td>
+            <td>${formatDate(item.date)}</td>
+            <td>
+                <div class="table-actions">
+                    <button class="edit-btn" data-id="${item.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="delete-btn" data-id="${item.id}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        
+        newsTableBody.appendChild(row);
+    });
+    
+    // Adiciona event listeners para edição e remoção
+    const editBtns = newsTableBody.querySelectorAll('.edit-btn');
+    const deleteBtns = newsTableBody.querySelectorAll('.delete-btn');
+    
+    editBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const newsId = btn.getAttribute('data-id');
+            editNews(newsId);
+        });
+    });
+    
+    deleteBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const newsId = btn.getAttribute('data-id');
+            deleteNews(newsId);
+        });
+    });
+}
+
+/**
+ * Carrega uma novidade para edição
+ */
+function editNews(newsId) {
+    const news = getNews();
+    const newsItem = news.find(n => n.id === newsId);
+    
+    if (newsItem) {
+        document.getElementById('news-id').value = newsItem.id;
+        document.getElementById('news-title').value = newsItem.title;
+        document.getElementById('news-description').value = newsItem.description;
+        document.getElementById('news-image').value = newsItem.imageUrl;
+        
+        // Format date for input (YYYY-MM-DD)
+        const date = new Date(newsItem.date);
+        const formattedDate = date.toISOString().split('T')[0];
+        document.getElementById('news-date').value = formattedDate;
+        
+        // Show preview
+        const imagePreview = document.getElementById('news-image-preview');
+        if (imagePreview) {
+            imagePreview.innerHTML = `<img src="${newsItem.imageUrl}" alt="Preview">`;
+            imagePreview.style.display = 'block';
+        }
+        
+        // Show cancel button
+        const cancelBtn = document.getElementById('cancel-news-btn');
+        if (cancelBtn) {
+            cancelBtn.style.display = 'inline-block';
+        }
+        
+        // Set active tab
+        setActiveAdminTab('news');
+        
+        // Scroll to form
+        document.getElementById('news-form').scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+/**
+ * Remove uma novidade
+ */
+function deleteNews(newsId) {
+    if (confirm('Tem certeza que deseja excluir esta novidade?')) {
+        if (removeNews(newsId)) {
+            showToast('Novidade removida', 'A novidade foi removida com sucesso.');
+            loadNewsTable();
+            loadNewsSection();
+        } else {
+            showToast('Erro', 'Não foi possível remover a novidade.', 'error');
+        }
+    }
 }
 
 /**

@@ -30,6 +30,9 @@ function initializeUI() {
     // Carrega os produtos
     loadProducts();
     
+    // Carrega a seção de novidades
+    loadNewsSection();
+    
     // Atualiza o contador do carrinho
     updateCartBadge();
     
@@ -125,6 +128,17 @@ function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
     
+    // Prepara a exibição dos tamanhos disponíveis (se houver)
+    let sizesHtml = '';
+    if (product.availableSizes && product.availableSizes.length > 0) {
+        sizesHtml = `
+            <div class="product-sizes">
+                <span>Tamanhos: </span>
+                ${product.availableSizes.map(size => `<span class="size-tag">${size}</span>`).join(' ')}
+            </div>
+        `;
+    }
+    
     card.innerHTML = `
         <div class="product-img">
             <img src="${product.imageUrl}" alt="${product.name}">
@@ -133,6 +147,7 @@ function createProductCard(product) {
             <h3 class="product-title">${product.name}</h3>
             <div class="product-price">${formatCurrency(product.price)}</div>
             <span class="product-category">${product.category}</span>
+            ${sizesHtml}
             <button class="btn btn-primary add-to-cart" data-id="${product.id}">
                 <i class="fas fa-shopping-cart"></i> Adicionar ao Carrinho
             </button>
@@ -147,4 +162,56 @@ function createProductCard(product) {
     });
     
     return card;
+}
+
+/**
+ * Carrega a seção de novidades na página
+ */
+function loadNewsSection() {
+    const newsSection = document.getElementById('news-section');
+    if (!newsSection) return;
+    
+    const newsContainer = document.getElementById('news-container');
+    if (!newsContainer) return;
+    
+    const news = getNews();
+    
+    // Se não houver novidades, oculta a seção
+    if (news.length === 0) {
+        newsSection.style.display = 'none';
+        return;
+    }
+    
+    // Exibe a seção
+    newsSection.style.display = 'block';
+    
+    // Limpa o container
+    newsContainer.innerHTML = '';
+    
+    // Ordenar novidades por data (mais recentes primeiro)
+    const sortedNews = [...news].sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+    });
+    
+    // Limita a 3 itens para exibição na página inicial
+    const recentNews = sortedNews.slice(0, 3);
+    
+    // Cria os cards de novidades
+    recentNews.forEach(item => {
+        const newsCard = document.createElement('div');
+        newsCard.className = 'news-card';
+        
+        newsCard.innerHTML = `
+            <div class="news-img">
+                <img src="${item.imageUrl}" alt="${item.title}">
+            </div>
+            <div class="news-info">
+                <h3 class="news-title">${item.title}</h3>
+                <div class="news-date">${formatDate(item.date)}</div>
+                <p class="news-description">${item.description}</p>
+            </div>
+        `;
+        
+        newsContainer.appendChild(newsCard);
+    });
 }
