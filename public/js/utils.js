@@ -1,126 +1,145 @@
 /**
- * Funções utilitárias da aplicação
+ * Gera um ID único
  */
-
-// Gerar ID único
 function generateId() {
-  return 'id-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return '_' + Math.random().toString(36).substr(2, 9);
 }
 
-// Formatar moeda para BRL
+/**
+ * Formata um valor monetário para o formato brasileiro
+ * @param {number} value - Valor a ser formatado
+ */
 function formatCurrency(value) {
-  return value.toFixed(2).replace('.', ',');
+    return `R$ ${value.toFixed(2).replace('.', ',')}`;
 }
 
-// Formatar data para exibição
+/**
+ * Formata uma data ISO para o formato brasileiro
+ * @param {string} dateString - Data no formato ISO
+ */
 function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('pt-BR');
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
 }
 
-// Exibir mensagem de toast
+/**
+ * Exibe uma notificação toast na tela
+ * @param {string} title - Título da notificação
+ * @param {string} message - Mensagem da notificação
+ * @param {string} type - Tipo da notificação (success, error)
+ */
 function showToast(title, message, type = 'success') {
-  const toastContainer = document.getElementById('toastContainer');
-  
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  
-  const icon = type === 'success' ? 'check_circle' : 'error';
-  
-  toast.innerHTML = `
-    <div class="toast-icon">
-      <span class="material-icons">${icon}</span>
-    </div>
-    <div class="toast-content">
-      <div class="toast-title">${title}</div>
-      <div class="toast-message">${message}</div>
-    </div>
-  `;
-  
-  toastContainer.appendChild(toast);
-  
-  // Remover toast após 3 segundos
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
+    const toast = document.getElementById('toast');
+    const toastTitle = document.getElementById('toast-title');
+    const toastMessage = document.getElementById('toast-message');
+    const toastIcon = toast.querySelector('.toast-icon i');
+    
+    // Define o título e mensagem
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+    
+    // Define o ícone e cor baseado no tipo
+    if (type === 'success') {
+        toastIcon.className = 'fas fa-check-circle';
+        toastIcon.style.color = 'var(--success-color)';
+    } else if (type === 'error') {
+        toastIcon.className = 'fas fa-exclamation-circle';
+        toastIcon.style.color = 'var(--danger-color)';
+    }
+    
+    // Exibe o toast
+    toast.style.display = 'flex';
+    
+    // Esconde o toast após 3 segundos
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
 }
 
-// Salvar dados no localStorage
+/**
+ * Salva dados no localStorage
+ * @param {string} key - Chave para armazenamento
+ * @param {any} data - Dados a serem armazenados
+ */
 function saveToLocalStorage(key, data) {
-  try {
-    const serializedData = JSON.stringify(data);
-    localStorage.setItem(key, serializedData);
-  } catch (error) {
-    console.error('Erro ao salvar no localStorage:', error);
-  }
+    localStorage.setItem(key, JSON.stringify(data));
 }
 
-// Carregar dados do localStorage
+/**
+ * Carrega dados do localStorage
+ * @param {string} key - Chave para recuperação
+ */
 function loadFromLocalStorage(key) {
-  try {
-    const serializedData = localStorage.getItem(key);
-    return serializedData ? JSON.parse(serializedData) : null;
-  } catch (error) {
-    console.error('Erro ao carregar do localStorage:', error);
-    return null;
-  }
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
 }
 
-// Remover dados do localStorage
+/**
+ * Remove dados do localStorage
+ * @param {string} key - Chave para remoção
+ */
 function removeFromLocalStorage(key) {
-  try {
     localStorage.removeItem(key);
-  } catch (error) {
-    console.error('Erro ao remover do localStorage:', error);
-  }
 }
 
-// Criar evento personalizado
+/**
+ * Dispara um evento personalizado
+ * @param {string} eventName - Nome do evento
+ */
 function dispatchCustomEvent(eventName) {
-  window.dispatchEvent(new Event(eventName));
+    const event = new Event(eventName);
+    document.dispatchEvent(event);
 }
 
-// Formatar data ISO para exibição de data e hora
+/**
+ * Formata data e hora ISO para o formato brasileiro
+ * @param {string} isoString - Data no formato ISO
+ */
 function formatDateTime(isoString) {
-  const date = new Date(isoString);
-  return date.toLocaleDateString('pt-BR') + ' às ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const date = new Date(isoString);
+    return `${date.toLocaleDateString('pt-BR')} às ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-// Enviar pedido para WhatsApp
+/**
+ * Envia pedido para o WhatsApp
+ * @param {Array} cartItems - Itens do carrinho
+ * @param {number} subtotal - Subtotal da compra
+ * @param {number} discount - Valor do desconto
+ * @param {number} total - Total da compra
+ * @param {Object} appliedCoupon - Cupom aplicado
+ */
 function sendToWhatsApp(cartItems, subtotal, discount, total, appliedCoupon) {
-  const settings = loadFromLocalStorage('settings') || { whatsappNumber: '5511987654321', welcomeMessage: 'Olá! Obrigado pelo seu pedido.' };
-  const whatsappNumber = settings.whatsappNumber;
-  
-  if (!whatsappNumber) {
-    showToast('Erro', 'Número de WhatsApp não configurado na área administrativa.', 'error');
-    return;
-  }
-  
-  // Construir mensagem
-  let message = settings.welcomeMessage ? `${settings.welcomeMessage}\n\n` : '';
-  message += '*Meu Pedido:*\n\n';
-  
-  // Adicionar itens do carrinho
-  cartItems.forEach(item => {
-    message += `• ${item.name} (${item.quantity}x) - R$ ${formatCurrency(item.price * item.quantity)}\n`;
-  });
-  
-  // Adicionar totais
-  message += `\n*Subtotal:* R$ ${formatCurrency(subtotal)}`;
-  
-  if (discount > 0 && appliedCoupon) {
-    message += `\n*Cupom Aplicado:* ${appliedCoupon.code} (${appliedCoupon.discount}%)`;
-    message += `\n*Desconto:* - R$ ${formatCurrency(discount)}`;
-  }
-  
-  message += `\n*Total:* R$ ${formatCurrency(total)}`;
-  
-  // Codificar mensagem para URL
-  const encodedMessage = encodeURIComponent(message);
-  
-  // Criar URL do WhatsApp
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-  
-  // Abrir WhatsApp em uma nova aba
-  window.open(whatsappUrl, '_blank');
+    // Carrega as configurações da loja
+    const settings = loadFromLocalStorage('settings') || { whatsappNumber: '5511999999999', welcomeMessage: 'Olá! Gostaria de fazer um pedido:' };
+    
+    // Monta a mensagem
+    let message = settings.welcomeMessage + '\n\n';
+    message += '*ITENS DO PEDIDO:*\n';
+    
+    cartItems.forEach(item => {
+        message += `• ${item.name} (${item.quantity}x) - ${formatCurrency(item.price * item.quantity)}\n`;
+    });
+    
+    message += '\n*RESUMO:*\n';
+    message += `Subtotal: ${formatCurrency(subtotal)}\n`;
+    
+    if (discount > 0) {
+        message += `Desconto: ${formatCurrency(discount)}`;
+        if (appliedCoupon) {
+            message += ` (Cupom: ${appliedCoupon.code})\n`;
+        } else {
+            message += '\n';
+        }
+    }
+    
+    message += `*Total: ${formatCurrency(total)}*`;
+    
+    // Codifica a mensagem para URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Cria o link do WhatsApp
+    const whatsappUrl = `https://wa.me/${settings.whatsappNumber}?text=${encodedMessage}`;
+    
+    // Abre o link em uma nova aba
+    window.open(whatsappUrl, '_blank');
 }
