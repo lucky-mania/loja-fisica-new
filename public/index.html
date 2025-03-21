@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fashion Store - Loja de Roupas</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Cabeçalho -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo-nav">
+          <h1 class="logo">Fashion Store</h1>
+          <nav class="main-nav">
+            <ul>
+              <li><a href="#home" class="active">Home</a></li>
+              <li><a href="#about">Sobre</a></li>
+            </ul>
+          </nav>
+        </div>
+        <div class="header-actions">
+          <button id="adminBtn" class="icon-btn">
+            <span class="material-icons">admin_panel_settings</span>
+            <span class="text">Admin</span>
+          </button>
+          <div class="cart-container">
+            <button id="cartBtn" class="icon-btn">
+              <span class="material-icons">shopping_cart</span>
+              <span id="cartBadge" class="cart-badge hidden">0</span>
+            </button>
+          </div>
+          <button id="mobileMenuBtn" class="icon-btn mobile-menu-btn">
+            <span class="material-icons">menu</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Menu móvel -->
+    <div id="mobileMenu" class="mobile-menu">
+      <div class="container">
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">Sobre</a></li>
+          <li><button id="adminMobileBtn">Admin</button></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo principal -->
+  <main>
+    <!-- Seção de produtos -->
+    <section id="home" class="section products-section">
+      <div class="container">
+        <h2 class="section-title">Produtos em Destaque</h2>
+        
+        <div class="filters">
+          <!-- Filtros serão adicionados aqui via JavaScript -->
+        </div>
+        
+        <div id="productsList" class="products-grid">
+          <!-- Produtos serão adicionados aqui via JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção sobre -->
+    <section id="about" class="section about-section">
+      <div class="container">
+        <h2 class="section-title">Sobre Nossa Loja</h2>
+        
+        <div class="about-content">
+          <div class="about-image">
+            <img src="https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Nossa Loja">
+          </div>
+          <div class="about-text">
+            <h3>Nossa História</h3>
+            <p>Fundada em 2015, nossa loja nasceu da paixão por moda e qualidade. Começamos como uma pequena boutique e hoje atendemos clientes em todo o Brasil.</p>
+            <p>Nosso compromisso é oferecer peças exclusivas, confortáveis e com estilo, sempre respeitando a sustentabilidade e a ética na produção.</p>
+            <p>Cada peça é selecionada com cuidado para garantir que nossos clientes tenham acesso ao melhor da moda contemporânea.</p>
+            
+            <div class="contact-info">
+              <h4>Entre em Contato</h4>
+              <p><span class="material-icons">location_on</span> Av. Exemplo, 123 - São Paulo, SP</p>
+              <p><span class="material-icons">phone</span> (11) 98765-4321</p>
+              <p><span class="material-icons">email</span> contato@fashionstore.com.br</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <h2>Fashion Store</h2>
+          <p>Moda para todos os estilos</p>
+        </div>
+        <div class="footer-links">
+          <h3>Links Rápidos</h3>
+          <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">Sobre</a></li>
+            <li><button id="adminFooterBtn">Admin</button></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3>Contato</h3>
+          <p><span class="material-icons">location_on</span> Av. Exemplo, 123 - São Paulo, SP</p>
+          <p><span class="material-icons">phone</span> (11) 98765-4321</p>
+          <p><span class="material-icons">email</span> contato@fashionstore.com.br</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Fashion Store. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal do Carrinho -->
+  <div id="cartModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Seu Carrinho</h3>
+        <button class="close-btn"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div id="cartItems" class="cart-items">
+          <!-- Itens do carrinho serão adicionados aqui via JavaScript -->
+        </div>
+        <div class="coupon-container">
+          <input type="text" id="couponInput" placeholder="Código de cupom">
+          <button id="applyCouponBtn">Aplicar</button>
+        </div>
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="cartSubtotal">R$ 0,00</span>
+          </div>
+          <div id="discountRow" class="summary-row discount-row hidden">
+            <span>Desconto</span>
+            <span id="cartDiscount">- R$ 0,00</span>
+          </div>
+          <div class="summary-row total-row">
+            <span>Total</span>
+            <span id="cartTotal">R$ 0,00</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="checkoutBtn" class="checkout-btn">
+          <span class="material-icons">whatsapp</span>
+          <span>Finalizar pelo WhatsApp</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Login Admin -->
+  <div id="adminModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Acesso Administrativo</h3>
+        <button class="close-btn"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <form id="adminLoginForm">
+          <div class="form-group">
+            <label for="adminPassword">Senha de Administrador</label>
+            <input type="password" id="adminPassword" required>
+          </div>
+          <div id="adminLoginError" class="error-message hidden">
+            Senha incorreta. Tente novamente.
+          </div>
+          <button type="submit" class="submit-btn">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Painel Admin (será mostrado após login) -->
+  <div id="adminPanel" class="admin-panel hidden">
+    <div class="container">
+      <h2 class="section-title">Área Administrativa</h2>
+      
+      <div class="admin-tabs">
+        <button class="tab-btn active" data-tab="products">Produtos</button>
+        <button class="tab-btn" data-tab="coupons">Cupons</button>
+        <button class="tab-btn" data-tab="settings">Configurações</button>
+        <button class="tab-btn" data-tab="history">Histórico</button>
+      </div>
+      
+      <div id="productsTab" class="tab-content active">
+        <div class="admin-card">
+          <h3 id="productFormTitle">Adicionar Novo Produto</h3>
+          <form id="addProductForm">
+            <input type="hidden" id="editProductId">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="productName">Nome do Produto</label>
+                <input type="text" id="productName" required>
+              </div>
+              <div class="form-group">
+                <label for="productPrice">Preço (R$)</label>
+                <input type="number" id="productPrice" step="0.01" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="productCategory">Categoria</label>
+                <select id="productCategory" required>
+                  <option value="">Selecione uma categoria</option>
+                  <option value="Camisetas">Camisetas</option>
+                  <option value="Calças">Calças</option>
+                  <option value="Vestidos">Vestidos</option>
+                  <option value="Acessórios">Acessórios</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="productImage">Imagem URL</label>
+                <input type="url" id="productImage" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="productDescription">Descrição</label>
+              <textarea id="productDescription" rows="3"></textarea>
+            </div>
+            <div class="form-buttons">
+              <button type="submit" id="saveProductBtn">Adicionar Produto</button>
+              <button type="button" id="cancelEditBtn" class="secondary-btn hidden">Cancelar</button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="admin-card">
+          <h3>Gerenciar Produtos</h3>
+          <div id="productsList" class="admin-table-container">
+            <table id="productsTable" class="admin-table">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Preço</th>
+                  <th>Categoria</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Produtos serão adicionados aqui via JavaScript -->
+              </tbody>
+            </table>
+            <div id="noProductsMessage" class="empty-message hidden">
+              Nenhum produto cadastrado.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="couponsTab" class="tab-content">
+        <div class="admin-card">
+          <h3>Criar Novo Cupom</h3>
+          <form id="addCouponForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="couponCode">Código do Cupom</label>
+                <input type="text" id="couponCode" required>
+              </div>
+              <div class="form-group">
+                <label for="couponDiscount">Desconto (%)</label>
+                <input type="number" id="couponDiscount" min="1" max="100" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="couponExpiry">Data de Expiração</label>
+                <input type="date" id="couponExpiry" required>
+              </div>
+              <div class="form-group">
+                <label for="couponLimit">Limite de Uso</label>
+                <input type="number" id="couponLimit" min="1" required>
+              </div>
+            </div>
+            <div class="form-buttons">
+              <button type="submit">Criar Cupom</button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="admin-card">
+          <h3>Gerenciar Cupons</h3>
+          <div id="couponsList" class="admin-table-container">
+            <table id="couponsTable" class="admin-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Desconto</th>
+                  <th>Expira em</th>
+                  <th>Uso</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Cupons serão adicionados aqui via JavaScript -->
+              </tbody>
+            </table>
+            <div id="noCouponsMessage" class="empty-message hidden">
+              Nenhum cupom cadastrado.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="settingsTab" class="tab-content">
+        <div class="admin-card">
+          <h3>Configurações da Loja</h3>
+          <form id="settingsForm">
+            <div class="form-group">
+              <label for="whatsappNumber">Número de WhatsApp</label>
+              <input type="text" id="whatsappNumber" required>
+              <small>Incluir código do país (Ex: 5511987654321)</small>
+            </div>
+            <div class="form-group">
+              <label for="welcomeMessage">Mensagem de Boas-vindas</label>
+              <textarea id="welcomeMessage" rows="3"></textarea>
+              <small>Esta mensagem será exibida no início do pedido enviado via WhatsApp</small>
+            </div>
+            <div class="form-group">
+              <label for="adminPasswordChange">Alterar Senha de Admin</label>
+              <input type="password" id="adminPasswordChange">
+              <small>Deixe em branco para manter a senha atual</small>
+            </div>
+            <div class="form-buttons">
+              <button type="submit">Salvar Configurações</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id="historyTab" class="tab-content">
+        <div class="admin-card">
+          <h3>Histórico de Alterações</h3>
+          <div id="historyList" class="history-list">
+            <!-- Histórico será adicionado aqui via JavaScript -->
+          </div>
+          <div id="noHistoryMessage" class="empty-message hidden">
+            Nenhum registro no histórico.
+          </div>
+        </div>
+      </div>
+      
+      <div class="admin-logout">
+        <button id="logoutBtn" class="logout-btn">
+          <span class="material-icons">logout</span>
+          <span>Sair</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagens de toast -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
