@@ -876,9 +876,41 @@ function deleteNews(newsId) {
  */
 function loadHistoryList() {
     const historyList = document.getElementById('history-list');
+    const historyContainer = document.getElementById('history-container');
     const history = getHistory();
     
+    // Limpa o conteúdo atual
     historyList.innerHTML = '';
+    
+    // Adiciona botão para limpar histórico se não existir já
+    if (!document.getElementById('clear-history-btn')) {
+        const clearButton = document.createElement('button');
+        clearButton.id = 'clear-history-btn';
+        clearButton.className = 'btn btn-danger';
+        clearButton.innerHTML = '<i class="fas fa-trash"></i> Limpar Histórico';
+        clearButton.addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+                clearHistory();
+                loadHistoryList();
+                showToast('Histórico limpo', 'O histórico de atividades foi limpo com sucesso.');
+            }
+        });
+        
+        // Adiciona informação sobre limpeza automática
+        const infoText = document.createElement('p');
+        infoText.className = 'history-info';
+        infoText.innerHTML = '<i class="fas fa-info-circle"></i> Registros com mais de 24 horas são limpos automaticamente.';
+        
+        // Adiciona elementos ao container
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'history-header';
+        headerDiv.appendChild(clearButton);
+        
+        if (historyContainer) {
+            historyContainer.insertBefore(headerDiv, historyList);
+            historyContainer.insertBefore(infoText, historyList);
+        }
+    }
     
     if (history.length === 0) {
         historyList.innerHTML = `

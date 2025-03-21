@@ -8,6 +8,7 @@ function initializeUI() {
     const filtersContainer = document.getElementById('filters');
     const productsGrid = document.getElementById('products-grid');
     const toastCloseBtn = document.querySelector('.toast-close');
+    const cartIcon = document.getElementById('cart-icon');
     
     // Event listeners
     mobileMenuBtn.addEventListener('click', toggleMobileMenu);
@@ -27,6 +28,16 @@ function initializeUI() {
         document.getElementById('toast').style.display = 'none';
     });
     
+    // Configura o carrinho inicialmente invisível
+    if (cartIcon) {
+        const cartCount = getCartCount();
+        if (cartCount === 0) {
+            cartIcon.style.opacity = '0.5';
+        } else {
+            cartIcon.style.opacity = '1';
+        }
+    }
+    
     // Carrega os produtos
     loadProducts();
     
@@ -37,7 +48,13 @@ function initializeUI() {
     updateCartBadge();
     
     // Ouve eventos de atualização do carrinho
-    document.addEventListener('cartUpdated', updateCartBadge);
+    document.addEventListener('cartUpdated', () => {
+        updateCartBadge();
+        showCartIfNotEmpty();
+    });
+    
+    // Mostra o carrinho quando não está vazio
+    showCartIfNotEmpty();
 }
 
 /**
@@ -162,6 +179,28 @@ function createProductCard(product) {
     });
     
     return card;
+}
+
+/**
+ * Mostra o ícone do carrinho apenas quando não estiver vazio
+ */
+function showCartIfNotEmpty() {
+    const cartIcon = document.getElementById('cart-icon');
+    if (!cartIcon) return;
+    
+    const cartCount = getCartCount();
+    
+    // Tornar o carrinho mais ou menos visível com base no conteúdo
+    if (cartCount === 0) {
+        cartIcon.style.opacity = '0.5';
+        cartIcon.style.transform = 'scale(0.9)';
+    } else {
+        cartIcon.style.opacity = '1';
+        cartIcon.style.transform = 'scale(1)';
+        
+        // Adiciona uma animação sutil quando há produtos
+        cartIcon.classList.add('cart-has-items');
+    }
 }
 
 /**

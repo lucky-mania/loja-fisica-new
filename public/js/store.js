@@ -94,6 +94,9 @@ function initializeStore() {
         saveToLocalStorage('history', []);
     }
     
+    // Verifica e limpa o histórico antigo (após 24h)
+    cleanOldHistory();
+    
     // Inicializa novidades se não existirem
     if (!loadFromLocalStorage('news')) {
         saveToLocalStorage('news', []);
@@ -411,4 +414,36 @@ function addToHistory(action, itemName, details) {
     saveToLocalStorage('history', history);
     
     return historyItem;
+}
+
+/**
+ * Limpa o histórico de itens com mais de 24 horas
+ */
+function cleanOldHistory() {
+    const history = getHistory();
+    if (!history.length) return;
+    
+    const oneDayMs = 24 * 60 * 60 * 1000; // 24 horas em milissegundos
+    const now = new Date();
+    
+    // Filtra apenas itens com menos de 24 horas
+    const filteredHistory = history.filter(item => {
+        const itemDate = new Date(item.timestamp);
+        const elapsed = now - itemDate;
+        return elapsed < oneDayMs;
+    });
+    
+    // Se houver alterações, salva
+    if (filteredHistory.length !== history.length) {
+        saveToLocalStorage('history', filteredHistory);
+        console.log(`Histórico limpo: ${history.length - filteredHistory.length} itens removidos`);
+    }
+}
+
+/**
+ * Limpa todo o histórico manualmente
+ */
+function clearHistory() {
+    saveToLocalStorage('history', []);
+    return [];
 }
