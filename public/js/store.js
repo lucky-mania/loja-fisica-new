@@ -93,6 +93,11 @@ function initializeStore() {
     if (!loadFromLocalStorage('history')) {
         saveToLocalStorage('history', []);
     }
+    
+    // Inicializa novidades se não existirem
+    if (!loadFromLocalStorage('news')) {
+        saveToLocalStorage('news', []);
+    }
 }
 
 /**
@@ -323,6 +328,61 @@ function updateSettings(settings) {
 function verifyAdminPassword(password) {
     const settings = getSettings();
     return password === settings.adminPassword;
+}
+
+/**
+ * Funções de gerenciamento de novidades
+ */
+function getNews() {
+    return loadFromLocalStorage('news') || [];
+}
+
+function addNews(newsData) {
+    const news = getNews();
+    const newItem = {
+        ...newsData,
+        id: generateId()
+    };
+    news.push(newItem);
+    saveToLocalStorage('news', news);
+    
+    // Registra no histórico
+    addToHistory('added', `Novidade: ${newsData.title}`, 'Novidade adicionada');
+    
+    return newItem;
+}
+
+function updateNews(newsItem) {
+    const news = getNews();
+    const index = news.findIndex(n => n.id === newsItem.id);
+    
+    if (index !== -1) {
+        news[index] = newsItem;
+        saveToLocalStorage('news', news);
+        
+        // Registra no histórico
+        addToHistory('modified', `Novidade: ${newsItem.title}`, 'Novidade atualizada');
+        return true;
+    }
+    
+    return false;
+}
+
+function removeNews(newsId) {
+    const news = getNews();
+    const index = news.findIndex(n => n.id === newsId);
+    
+    if (index !== -1) {
+        const removedNews = news[index];
+        news.splice(index, 1);
+        saveToLocalStorage('news', news);
+        
+        // Registra no histórico
+        addToHistory('removed', `Novidade: ${removedNews.title}`, 'Novidade removida');
+        return true;
+    }
+    
+    return false;
 }
 
 /**

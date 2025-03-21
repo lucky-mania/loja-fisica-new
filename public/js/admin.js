@@ -12,6 +12,19 @@ function initializeAdmin() {
     const adminLogoutBtn = document.getElementById('admin-logout-btn');
     const tabBtns = document.querySelectorAll('.tab-btn');
     
+    // Gallery Modal Elements
+    const galleryModal = document.getElementById('gallery-modal');
+    const galleryBtn = document.getElementById('gallery-btn');
+    const newsGalleryBtn = document.getElementById('news-gallery-btn');
+    const closeGalleryBtn = document.getElementById('close-gallery-modal');
+    const selectImageBtn = document.getElementById('select-image-btn');
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    
+    // Variáveis para controle da galeria
+    let currentInput = null;
+    let currentPreview = null;
+    let selectedGalleryItem = null;
+    
     // Events
     adminLoginBtn.addEventListener('click', openAdminLogin);
     closeAdminLoginBtn.addEventListener('click', closeAdminLogin);
@@ -42,16 +55,90 @@ function initializeAdmin() {
         }
     });
     
+    // Fechamento da galeria ao clicar fora
+    if (galleryModal) {
+        galleryModal.addEventListener('click', (e) => {
+            if (e.target === galleryModal) {
+                galleryModal.style.display = 'none';
+            }
+        });
+    }
+    
     // Formulários
     const productForm = document.getElementById('product-form');
     const couponForm = document.getElementById('coupon-form');
+    const newsForm = document.getElementById('news-form');
     const settingsForm = document.getElementById('settings-form');
     const cancelProductBtn = document.getElementById('cancel-product-btn');
+    const cancelNewsBtn = document.getElementById('cancel-news-btn');
     
     productForm.addEventListener('submit', handleProductSubmit);
     couponForm.addEventListener('submit', handleCouponSubmit);
     settingsForm.addEventListener('submit', handleSettingsSubmit);
     cancelProductBtn.addEventListener('click', cancelProductEdit);
+    
+    // Formulário de novidades
+    if (newsForm) {
+        newsForm.addEventListener('submit', handleNewsSubmit);
+    }
+    
+    if (cancelNewsBtn) {
+        cancelNewsBtn.addEventListener('click', cancelNewsEdit);
+    }
+    
+    // Gallery Events
+    if (galleryBtn) {
+        galleryBtn.addEventListener('click', () => {
+            openGallery('product-image', 'image-preview');
+        });
+    }
+    
+    if (newsGalleryBtn) {
+        newsGalleryBtn.addEventListener('click', () => {
+            openGallery('news-image', 'news-image-preview');
+        });
+    }
+    
+    if (closeGalleryBtn) {
+        closeGalleryBtn.addEventListener('click', () => {
+            galleryModal.style.display = 'none';
+        });
+    }
+    
+    if (galleryItems.length > 0) {
+        galleryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // Remove selected class from all items
+                galleryItems.forEach(i => i.style.border = '2px solid transparent');
+                
+                // Add selected class to clicked item
+                item.style.border = '2px solid var(--primary-color)';
+                selectedGalleryItem = item;
+            });
+        });
+    }
+    
+    if (selectImageBtn) {
+        selectImageBtn.addEventListener('click', () => {
+            if (selectedGalleryItem && currentInput) {
+                const imageUrl = selectedGalleryItem.getAttribute('data-url');
+                currentInput.value = imageUrl;
+                
+                // Show preview
+                if (currentPreview) {
+                    currentPreview.innerHTML = `<img src="${imageUrl}" alt="Preview">`;
+                    currentPreview.style.display = 'block';
+                }
+                
+                // Reset and close
+                selectedGalleryItem = null;
+                galleryModal.style.display = 'none';
+            }
+        });
+    }
+    
+    // Size options initialization for products
+    initializeSizeOptions();
     
     // Verifica se há uma sessão de admin ativa
     checkAdminSession();
