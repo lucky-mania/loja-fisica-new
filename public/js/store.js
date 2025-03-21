@@ -298,6 +298,19 @@ function applyCoupon(couponCode) {
     // Aplica o cupom
     saveToLocalStorage('appliedCoupon', coupon);
     
+    // Incrementa o contador de uso
+    const updatedCoupons = coupons.map(c => {
+        if (c.code === coupon.code) {
+            return { ...c, usageCount: c.usageCount + 1 };
+        }
+        return c;
+    });
+    
+    saveToLocalStorage('coupons', updatedCoupons);
+    
+    // Retorna sucesso com o cupom aplicado
+    return { success: true, message: 'Cupom aplicado com sucesso', coupon };
+    
     // Atualiza o contador de uso do cupom
     coupon.usageCount += 1;
     saveToLocalStorage('coupons', coupons);
