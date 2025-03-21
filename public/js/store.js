@@ -11,7 +11,9 @@ function initializeStore() {
                 price: 39.90,
                 category: 'camisetas',
                 imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-                description: 'Camiseta básica de algodão com acabamento de primeira linha.'
+                description: 'Camiseta básica de algodão com acabamento de primeira linha.',
+                sizes: ['P', 'M', 'G', 'GG'],
+                availableSizes: ['P', 'M', 'G', 'GG']
             },
             {
                 id: generateId(),
@@ -19,7 +21,9 @@ function initializeStore() {
                 price: 89.90,
                 category: 'calcas',
                 imageUrl: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-                description: 'Calça jeans confortável com design moderno e durável.'
+                description: 'Calça jeans confortável com design moderno e durável.',
+                sizes: ['38', '40', '42', '44', '46'],
+                availableSizes: ['38', '40', '42', '44']
             },
             {
                 id: generateId(),
@@ -27,7 +31,9 @@ function initializeStore() {
                 price: 29.90,
                 category: 'acessorios',
                 imageUrl: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-                description: 'Boné esportivo com proteção UV e material respirável.'
+                description: 'Boné esportivo com proteção UV e material respirável.',
+                sizes: ['Único'],
+                availableSizes: ['Único']
             },
             {
                 id: generateId(),
@@ -35,7 +41,9 @@ function initializeStore() {
                 price: 49.90,
                 category: 'camisetas',
                 imageUrl: 'https://images.unsplash.com/photo-1503341733017-1901578f9f1e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-                description: 'Camiseta com estampa exclusiva, 100% algodão.'
+                description: 'Camiseta com estampa exclusiva, 100% algodão.',
+                sizes: ['P', 'M', 'G', 'GG'],
+                availableSizes: ['P', 'M', 'GG']
             },
             {
                 id: generateId(),
@@ -43,7 +51,9 @@ function initializeStore() {
                 price: 79.90,
                 category: 'calcas',
                 imageUrl: 'https://images.unsplash.com/photo-1606486306004-5bc76f9109e5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-                description: 'Calça de moletom confortável, ideal para o dia a dia.'
+                description: 'Calça de moletom confortável, ideal para o dia a dia.',
+                sizes: ['P', 'M', 'G', 'GG'],
+                availableSizes: ['P', 'G', 'GG']
             },
             {
                 id: generateId(),
@@ -51,7 +61,9 @@ function initializeStore() {
                 price: 19.90,
                 category: 'acessorios',
                 imageUrl: 'https://images.unsplash.com/photo-1573053009858-c1ed191d8a1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-                description: 'Pulseira de couro artesanal com acabamento premium.'
+                description: 'Pulseira de couro artesanal com acabamento premium.',
+                sizes: ['Único'],
+                availableSizes: ['Único']
             }
         ];
         saveToLocalStorage('products', defaultProducts);

@@ -39,6 +39,17 @@
             <a href="#products" class="btn btn-primary">Ver Produtos</a>
         </div>
     </section>
+    
+    <!-- News Section -->
+    <section class="news-section" id="news">
+        <div class="container">
+            <h2 class="section-title">Novidades</h2>
+            <div class="news-carousel" id="news-carousel">
+                <!-- News items will be loaded here dynamically -->
+                <div class="news-empty">Em breve, novas coleções e produtos!</div>
+            </div>
+        </div>
+    </section>
 
     <!-- Products Section -->
     <section class="products-section" id="products">
@@ -182,26 +193,27 @@
             </div>
             <div class="modal-body">
                 <div class="admin-tabs">
-                    <button class="tab-btn active" data-tab="products">Produtos</button>
-                    <button class="tab-btn" data-tab="coupons">Cupons</button>
-                    <button class="tab-btn" data-tab="settings">Configurações</button>
-                    <button class="tab-btn" data-tab="history">Histórico</button>
+                    <button class="tab-btn active" data-tab="products">🛍️ Produtos</button>
+                    <button class="tab-btn" data-tab="coupons">🏷️ Cupons</button>
+                    <button class="tab-btn" data-tab="news">🆕 Novidades</button>
+                    <button class="tab-btn" data-tab="settings">⚙️ Configurações</button>
+                    <button class="tab-btn" data-tab="history">📜 Histórico</button>
                 </div>
                 
                 <div class="tab-content active" id="products-tab">
-                    <h3>Gerenciar Produtos</h3>
+                    <h3>Gerenciar Produtos 🛍️</h3>
                     <form id="product-form">
                         <input type="hidden" id="product-id">
                         <div class="form-group">
-                            <label for="product-name">Nome:</label>
+                            <label for="product-name">Nome: 📝</label>
                             <input type="text" id="product-name" required>
                         </div>
                         <div class="form-group">
-                            <label for="product-price">Preço:</label>
+                            <label for="product-price">Preço: 💰</label>
                             <input type="number" id="product-price" step="0.01" min="0" required>
                         </div>
                         <div class="form-group">
-                            <label for="product-category">Categoria:</label>
+                            <label for="product-category">Categoria: 📂</label>
                             <select id="product-category" required>
                                 <option value="camisetas">Camisetas</option>
                                 <option value="calcas">Calças</option>
@@ -209,16 +221,26 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="product-image">URL da Imagem:</label>
-                            <input type="text" id="product-image" required>
+                            <label for="product-image">Imagem: 🖼️</label>
+                            <div class="image-input-container">
+                                <input type="text" id="product-image" required>
+                                <button type="button" class="btn btn-secondary" id="gallery-btn">Selecionar da Galeria</button>
+                            </div>
+                            <div id="image-preview" class="image-preview"></div>
                         </div>
                         <div class="form-group">
-                            <label for="product-description">Descrição:</label>
+                            <label for="product-description">Descrição: 📄</label>
                             <textarea id="product-description" rows="3"></textarea>
                         </div>
+                        <div class="form-group">
+                            <label>Tamanhos Disponíveis: 👕</label>
+                            <div id="size-options" class="size-options">
+                                <!-- Os tamanhos serão gerados dinamicamente pelo JavaScript -->
+                            </div>
+                        </div>
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Salvar</button>
-                            <button type="button" class="btn btn-secondary" id="cancel-product-btn" style="display: none;">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                            <button type="button" class="btn btn-secondary" id="cancel-product-btn" style="display: none;">❌ Cancelar</button>
                         </div>
                     </form>
                     <div class="products-table-container">
@@ -239,25 +261,25 @@
                 </div>
                 
                 <div class="tab-content" id="coupons-tab">
-                    <h3>Gerenciar Cupons</h3>
+                    <h3>Gerenciar Cupons 🏷️</h3>
                     <form id="coupon-form">
                         <div class="form-group">
-                            <label for="coupon-code">Código:</label>
+                            <label for="coupon-code">Código: 🔑</label>
                             <input type="text" id="coupon-code" required>
                         </div>
                         <div class="form-group">
-                            <label for="coupon-discount">Desconto (%):</label>
+                            <label for="coupon-discount">Desconto (%): 💯</label>
                             <input type="number" id="coupon-discount" min="1" max="100" required>
                         </div>
                         <div class="form-group">
-                            <label for="coupon-expiry">Data de Expiração:</label>
+                            <label for="coupon-expiry">Data de Expiração: 📅</label>
                             <input type="date" id="coupon-expiry" required>
                         </div>
                         <div class="form-group">
-                            <label for="coupon-limit">Limite de Uso:</label>
+                            <label for="coupon-limit">Limite de Uso: 🔄</label>
                             <input type="number" id="coupon-limit" min="1" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Adicionar Cupom</button>
+                        <button type="submit" class="btn btn-primary">🎟️ Adicionar Cupom</button>
                     </form>
                     <div class="coupons-table-container">
                         <table class="admin-table" id="coupons-table">
@@ -277,35 +299,80 @@
                     </div>
                 </div>
                 
+                <div class="tab-content" id="news-tab">
+                    <h3>Gerenciar Novidades 🆕</h3>
+                    <form id="news-form">
+                        <input type="hidden" id="news-id">
+                        <div class="form-group">
+                            <label for="news-title">Título: 📢</label>
+                            <input type="text" id="news-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="news-description">Descrição: 📋</label>
+                            <textarea id="news-description" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="news-image">Imagem: 🖼️</label>
+                            <div class="image-input-container">
+                                <input type="text" id="news-image" required>
+                                <button type="button" class="btn btn-secondary" id="news-gallery-btn">Selecionar da Galeria</button>
+                            </div>
+                            <div id="news-image-preview" class="image-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="news-date">Data da Novidade: 📅</label>
+                            <input type="date" id="news-date" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                            <button type="button" class="btn btn-secondary" id="cancel-news-btn" style="display: none;">❌ Cancelar</button>
+                        </div>
+                    </form>
+                    <div class="news-table-container">
+                        <table class="admin-table" id="news-table">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- News items will be loaded here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div class="tab-content" id="settings-tab">
-                    <h3>Configurações da Loja</h3>
+                    <h3>Configurações da Loja ⚙️</h3>
                     <form id="settings-form">
                         <div class="form-group">
-                            <label for="whatsapp-number">Número de WhatsApp:</label>
+                            <label for="whatsapp-number">Número de WhatsApp: 📱</label>
                             <input type="text" id="whatsapp-number" placeholder="Ex: 5511999999999" required>
                         </div>
                         <div class="form-group">
-                            <label for="welcome-message">Mensagem de Boas-vindas:</label>
+                            <label for="welcome-message">Mensagem de Boas-vindas: 👋</label>
                             <textarea id="welcome-message" rows="3" required></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="admin-password-change">Nova Senha de Admin:</label>
+                            <label for="admin-password-change">Nova Senha de Admin: 🔐</label>
                             <input type="password" id="admin-password-change">
                             <small>Deixe em branco para manter a senha atual</small>
                         </div>
-                        <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+                        <button type="submit" class="btn btn-primary">💾 Salvar Configurações</button>
                     </form>
                 </div>
                 
                 <div class="tab-content" id="history-tab">
-                    <h3>Histórico de Atividades</h3>
+                    <h3>Histórico de Atividades 📜</h3>
                     <div class="history-list" id="history-list">
                         <!-- History items will be loaded here dynamically -->
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-danger" id="admin-logout-btn">Sair</button>
+                <button class="btn btn-danger" id="admin-logout-btn">🚪 Sair</button>
             </div>
         </div>
     </div>
