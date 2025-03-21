@@ -620,6 +620,7 @@ img {
     padding: 8px 12px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius) 0 0 var(--border-radius);
+    transition: all 0.3s ease;
 }
 
 .coupon-form button {
@@ -679,6 +680,31 @@ img {
     display: block;
     margin-top: 5px;
     color: var(--light-text);
+}
+
+/* Animações para campos */
+.coupon-success {
+    border-color: var(--success-color) !important;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25) !important;
+    animation: pulse-success 1.5s;
+}
+
+.coupon-error {
+    border-color: var(--danger-color) !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25) !important;
+    animation: shake 0.5s;
+}
+
+@keyframes pulse-success {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
 
 /* Admin Tabs */
