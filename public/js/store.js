@@ -275,7 +275,8 @@ function removeCoupon(couponCode) {
 
 function applyCoupon(couponCode) {
     const coupons = getCoupons();
-    const coupon = coupons.find(c => c.code === couponCode);
+    // Faz uma busca case-insensitive para o código do cupom
+    const coupon = coupons.find(c => c.code.toLowerCase() === couponCode.toLowerCase());
     
     if (!coupon) {
         return { success: false, message: 'Cupom não encontrado' };
@@ -300,6 +301,8 @@ function applyCoupon(couponCode) {
     // Atualiza o contador de uso do cupom
     coupon.usageCount += 1;
     saveToLocalStorage('coupons', coupons);
+    
+    addToHistory('applied', `Cupom ${coupon.code}`, `Cupom de ${coupon.discount}% aplicado no carrinho`);
     
     return { success: true, coupon };
 }

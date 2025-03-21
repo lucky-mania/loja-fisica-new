@@ -207,25 +207,22 @@ function showCartIfNotEmpty() {
  * Carrega a seção de novidades na página
  */
 function loadNewsSection() {
-    const newsSection = document.getElementById('news-section');
+    const newsSection = document.getElementById('news');
     if (!newsSection) return;
     
-    const newsContainer = document.getElementById('news-container');
-    if (!newsContainer) return;
+    const newsCarousel = document.getElementById('news-carousel');
+    if (!newsCarousel) return;
     
     const news = getNews();
     
-    // Se não houver novidades, oculta a seção
+    // Limpa o container
+    newsCarousel.innerHTML = '';
+    
+    // Se não houver novidades, exibe mensagem
     if (news.length === 0) {
-        newsSection.style.display = 'none';
+        newsCarousel.innerHTML = '<div class="news-empty">Em breve, novas coleções e produtos!</div>';
         return;
     }
-    
-    // Exibe a seção
-    newsSection.style.display = 'block';
-    
-    // Limpa o container
-    newsContainer.innerHTML = '';
     
     // Ordenar novidades por data (mais recentes primeiro)
     const sortedNews = [...news].sort((a, b) => {
@@ -251,6 +248,6 @@ function loadNewsSection() {
             </div>
         `;
         
-        newsContainer.appendChild(newsCard);
+        newsCarousel.appendChild(newsCard);
     });
 }

@@ -200,10 +200,27 @@ function handleApplyCoupon() {
     const result = applyCoupon(couponCode);
     
     if (result.success) {
+        // Aplica o cupom imediatamente
         showToast('Cupom aplicado', `Desconto de ${result.coupon.discount}% aplicado com sucesso!`);
-        loadCartItems(); // Atualiza os totais
+        
+        // Destaca o campo do cupom com uma animação de sucesso
+        couponInput.classList.add('coupon-success');
+        setTimeout(() => {
+            couponInput.classList.remove('coupon-success');
+        }, 1500);
+        
+        // Atualiza a exibição dos itens e totais
+        loadCartItems();
     } else {
         showToast('Erro', result.message, 'error');
+        
+        // Destaca o campo com uma animação de erro
+        couponInput.classList.add('coupon-error');
+        setTimeout(() => {
+            couponInput.classList.remove('coupon-error');
+        }, 1500);
+        
+        // Limpa o campo se o cupom for inválido
         couponInput.value = '';
     }
 }
