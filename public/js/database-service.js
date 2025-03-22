@@ -1,26 +1,25 @@
-// Database Service for handling all database operations
+import { db } from './firebase-config.js';
+import { 
+    collection, 
+    onSnapshot, 
+    addDoc, 
+    updateDoc, 
+    deleteDoc, 
+    doc, 
+    serverTimestamp,
+    runTransaction,
+    orderBy,
+    query 
+} from 'firebase/firestore';
 
 // Products Collection
-const productsCollection = db.collection('products');
+const productsCollection = collection(db, 'products');
+const inventoryCollection = collection(db, 'inventory');
+const salesCollection = collection(db, 'sales');
 
-// Add a new product
-async function addProduct(productData) {
-    try {
-        const docRef = await productsCollection.add({
-            ...productData,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        return docRef.id;
-    } catch (error) {
-        console.error("Error adding product: ", error);
-        throw error;
-    }
-}
-
-// Get all products
-function getProducts(callback) {
-    return productsCollection.onSnapshot((snapshot) => {
+// Função para ouvir mudanças em tempo real
+export function listenToProducts(callback) {
+    return onSnapshot(productsCollection, (snapshot) => {
         const products = [];
         snapshot.forEach((doc) => {
             products.push({ id: doc.id, ...doc.data() });
@@ -29,63 +28,77 @@ function getProducts(callback) {
     });
 }
 
-// Update a product
-async function updateProduct(productId, productData) {
+// Adicionar produto
+export async function addProduct(productData) {
     try {
-        await productsCollection.doc(productId).update({
+        const docRef = await addDoc(productsCollection, {
             ...productData,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+        return docRef.id;
+    } catch (error) {
+        console.error("Erro ao adicionar produto:", error);
+        throw error;
+    }
+}
+
+// Atualizar produto
+export async function updateProduct(productId, productData) {
+    try {
+        const productRef = doc(productsCollection, productId);
+        await updateDoc(productRef, {
+            ...productData,
+            updatedAt: serverTimestamp()
         });
     } catch (error) {
-        console.error("Error updating product: ", error);
+        console.error("Erro ao atualizar produto:", error);
         throw error;
     }
 }
 
-// Delete a product
-async function deleteProduct(productId) {
+// Deletar produto
+export async function deleteProduct(productId) {
     try {
-        await productsCollection.doc(productId).delete();
+        await deleteDoc(doc(productsCollection, productId));
     } catch (error) {
-        console.error("Error deleting product: ", error);
+        console.error("Erro ao deletar produto:", error);
         throw error;
     }
 }
 
-// Inventory Collection
-const inventoryCollection = db.collection('inventory');
-
-// Update inventory
-async function updateInventory(productId, quantity, type) {
+// Atualizar inventário
+export async function updateInventory(productId, quantity, type) {
     try {
-        const inventoryRef = inventoryCollection.doc(productId);
-        await db.runTransaction(async (transaction) => {
+        const inventoryRef = doc(inventoryCollection, productId);
+        await runTransaction(db, async (transaction) => {
             const inventoryDoc = await transaction.get(inventoryRef);
-            if (!inventoryDoc.exists) {
+            if (!inventoryDoc.exists()) {
                 transaction.set(inventoryRef, {
                     productId,
                     quantity,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    lastUpdated: serverTimestamp()
                 });
             } else {
                 const currentQuantity = inventoryDoc.data().quantity;
                 const newQuantity = type === 'add' ? currentQuantity + quantity : currentQuantity - quantity;
                 transaction.update(inventoryRef, {
                     quantity: newQuantity,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    lastUpdated: serverTimestamp()
                 });
             }
         });
     } catch (error) {
-        console.error("Error updating inventory: ", error);
+        console.error("Erro ao atualizar inventário:", error);
         throw error;
     }
 }
 
-// Get inventory for a product
-function getInventory(productId, callback) {
-    return inventoryCollection.doc(productId).onSnapshot((doc) => {
-        if (doc.exists) {
+// Obter inventário de um produto
+export function getInventory(productId, callback) {
+    const inventoryRef = doc(inventoryCollection, productId);
+    return onSnapshot(inventoryRef, (doc) => {
+        if (doc.exists()) {
             callback({ id: doc.id, ...doc.data() });
         } else {
             callback(null);
@@ -93,48 +106,32 @@ function getInventory(productId, callback) {
     });
 }
 
-// Sales Collection
-const salesCollection = db.collection('sales');
-
-// Record a new sale
-async function recordSale(saleData) {
+// Registrar uma venda
+export async function recordSale(saleData) {
     try {
-        const saleRef = await salesCollection.add({
+        const saleRef = await addDoc(salesCollection, {
             ...saleData,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            timestamp: serverTimestamp()
         });
         
-        // Update inventory after sale
+        // Atualiza o inventário após a venda
         await updateInventory(saleData.productId, saleData.quantity, 'subtract');
         
         return saleRef.id;
     } catch (error) {
-        console.error("Error recording sale: ", error);
+        console.error("Erro ao registrar venda:", error);
         throw error;
     }
 }
 
-// Get sales history
-function getSalesHistory(callback) {
-    return salesCollection
-        .orderBy('timestamp', 'desc')
-        .onSnapshot((snapshot) => {
-            const sales = [];
-            snapshot.forEach((doc) => {
-                sales.push({ id: doc.id, ...doc.data() });
-            });
-            callback(sales);
+// Obter histórico de vendas
+export function getSalesHistory(callback) {
+    const q = query(salesCollection, orderBy('timestamp', 'desc'));
+    return onSnapshot(q, (snapshot) => {
+        const sales = [];
+        snapshot.forEach((doc) => {
+            sales.push({ id: doc.id, ...doc.data() });
         });
+        callback(sales);
+    });
 }
-
-// Export all functions
-export {
-    addProduct,
-    getProducts,
-    updateProduct,
-    deleteProduct,
-    updateInventory,
-    getInventory,
-    recordSale,
-    getSalesHistory
-}; 
